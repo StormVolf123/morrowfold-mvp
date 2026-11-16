@@ -16,7 +16,7 @@ from .models import Write, Chat, DraftRequest, MODELS
 from .store import Store
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore', hide_input_in_errors=True)
     data_key: str
     database_url: str
     allowed_origins: str = 'http://127.0.0.1:5173'
