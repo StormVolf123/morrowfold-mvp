@@ -4,17 +4,17 @@
 
 `.github/workflows/pages.yml` builds, tests and deploys `dist/` on pushes to `main`. Repository Settings → Pages must use **GitHub Actions**. No backend secrets are required for preview deployment.
 
-Default `web/public/config.json`:
+Current deployed `web/public/config.json`:
 
 ```json
-{"apiUrl":"","mode":"preview"}
+{"apiUrl":"https://morrowfold-api-8ify.onrender.com","mode":"live"}
 ```
 
 Only after the API is deployed and acceptance tests pass, set a public HTTPS API URL and `"mode":"live"`. Never put a database connection string in this file. GitHub Pages cannot run FastAPI, hold database secrets, or execute model requests securely.
 
 ## Database — managed PostgreSQL in the EU
 
-Create a dedicated Supabase or Neon project in a specific EU region, such as Frankfurt. Do not rely on a broad Europe selection, which may include non-EU regions. The provider and backend host have not yet been chosen. Compare actual free-tier limits, backups, pausing, egress and upgrade costs before opening the pilot.
+Create a dedicated Supabase or Neon project in a specific EU region, such as Frankfurt. Do not rely on a broad Europe selection, which may include non-EU regions. The current deployment uses Supabase Central EU (Frankfurt) and Render Frankfurt. Compare actual free-tier limits, backups, pausing, egress and upgrade costs before opening the pilot.
 
 The application uses ordinary PostgreSQL via psycopg; it is compatible with both providers without changing business logic. Supabase Auth/Storage are not integrated in this slice. No service-role key or public browser database access is used.
 
@@ -35,7 +35,7 @@ Create a dedicated runtime LOGIN role using the provider’s secure admin flow. 
 
 Use a provider pooled URL for runtime when needed and a direct URL for migration. Prepared statements are disabled for transaction-pooler compatibility; tenant identity is set locally inside each transaction, never session-wide.
 
-## API — European host (selection pending)
+## API — Render Frankfurt
 
 The Dockerfile runs a non-root Uvicorn process on port 8000. Deploy behind an HTTPS reverse proxy with one worker initially. Provide secrets through the host's secret manager:
 
@@ -68,12 +68,22 @@ Distribute privately through a channel you choose. The file has mode 0600 and `.
 - Real Mistral requests use only selected context and produce editable drafts without sending applications.
 - Verify Pages project-path assets, mobile keyboard, reduced motion, CORS, gateway rate limits and EU processing settings.
 
-Local database integration tests and unit/API tests support these checks but do not prove the hosted deployment is configured correctly. Public Pages stays in preview until then.
+Local database integration tests and unit/API tests support these checks but do not prove the hosted deployment is configured correctly. The founder-only live pilot is enabled; outstanding wider-pilot acceptance checks remain required. See the implementation log for completed evidence.
 
 ## Prepared Supabase + Render setup
 
-A root `render.yaml` is available for the proposed Frankfurt backend. It contains no secrets and does not enable public live mode. Its free instance is for setup only; request an approved always-on plan before regular testing. Supply the three secret values in Render's environment settings. The encryption key must remain stable across redeployments and be backed up securely.
+The root `render.yaml` describes the deployed Frankfurt backend. It contains no secrets and does not enable public live mode. Its free instance is for setup only; request an approved always-on plan before regular testing. Supply required secrets in Render's environment settings. The encryption key must remain stable across redeployments and be backed up securely.
 
 With the environment configured, run `python scripts/check_setup.py --mistral` from the repository root. This validates database permissions/RLS and available Mistral models without sending user data. A passing result is followed by real persistence and chat smoke tests; only then change `web/public/config.json` to live.
 
 See [integration sequencing](integrations.md) for Gmail and LinkedIn permissions and the initial supported workflows.
+
+## Deployed Gmail configuration — 16 November 2026
+
+Migration `api/migrations/002_google_connections.sql` has been applied to the dedicated Supabase project. Both new tables have forced RLS. For a new installation, apply it once after the base schema and runtime role exist; do not rerun it blindly.
+
+Render has `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` configured as backend environment variables. Google project `healthy-mark-514905-q9` has Gmail API enabled, External/Testing OAuth, and the founder registered as a test user. Callback: `https://morrowfold-api-8ify.onrender.com/v1/integrations/google/callback`.
+
+The Gmail release is `dbc4fb18c823f8fdbd1a59189c9d234d0492ab77`; Render deployment `dep-dbta1sui0phs73f4q8u0` reached live, and GitHub Pages verification/deployment succeeded. Authenticated status returned configured=true, connected=false. The owner must complete Settings → Connect Gmail, then test a selected message. No mailbox contents were read during setup.
+
+The Supabase runtime uses the Frankfurt session pooler with hostname-verifying TLS and the trusted provider CA in `api/certs/`. Preserve DATA_KEY across releases. Backend auto-deploy is off; environment updates can initiate deployments, so inspect deployment status before triggering another one.

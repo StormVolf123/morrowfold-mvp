@@ -22,7 +22,7 @@ flowchart TD
 
 Live: private pilot access, areas, tasks, manually curated memory, scoped chat, application drafts, encrypted content and forced tenant row-level security. PostgreSQL is accessed only through the backend. Supabase Auth is not in use; access codes are a temporary pilot identity mechanism. The backend holds DATA_KEY and can decrypt content, so this is not end-to-end encryption. Mistral receives decrypted context selected by the server.
 
-Not live: OAuth integrations, tool-calling agents, background schedules, mail delivery, live news, social sharing. GitHub Pages uses a global delivery network; selected Frankfurt backend/database regions do not establish EU-only processing for every provider. Verify Mistral processing/retention and provider agreements before promising an EU-only service.
+Gmail OAuth and selected-message assistance are deployed; mailbox consent and a real selected-message test remain pending. Not live: other OAuth integrations, tool-calling agents, background schedules, mail delivery, live news, social sharing. GitHub Pages uses a global delivery network; selected Frankfurt backend/database regions do not establish EU-only processing for every provider. Verify Mistral processing/retention and provider agreements before promising an EU-only service.
 
 ## Personalization layers to implement
 

@@ -4,7 +4,9 @@ A calm, visual workspace for your ambitions: areas, small next steps, curated me
 
 ## Current status
 
-The GitHub Pages build is an **interactive preview using fictional data**. Edits last until refresh. It does not pretend to save data or return AI replies. The API is implemented and tested against an isolated local PostgreSQL instance, but the live pilot requires the deployment steps below. Do not invite real users to upload personal information before the live acceptance checks pass.
+As of **16 November 2026**, the [live private pilot](https://stormvolf123.github.io/morrowfold-mvp/) uses the Render API and Supabase PostgreSQL in Frankfurt, with real Mistral responses. Access requires an individual pilot code. Gmail connection support is deployed; mailbox authorization and a selected-message end-to-end test are still pending. This is not a public-launch-ready product.
+
+See the [implementation log](docs/implementation-log.md) for dated changes, validation evidence and remaining work.
 
 ### Implemented
 
@@ -14,10 +16,11 @@ The GitHub Pages build is an **interactive preview using fictional data**. Edits
 - API with expiring individual pilot access codes, tenant-scoped queries, parameter binding, optimistic concurrency, encrypted content, and request limits.
 - Mistral chat using selected area + shared memory, and application drafts with source text, review status and preserved provenance.
 - GitHub Pages workflow and a non-root API container.
+- Read-only Gmail OAuth, encrypted connection storage, selected-message summaries/reply drafts with explicit AI-sharing consent, and disconnect/revocation.
 
 ### Not active yet
 
-Live cloud storage, AI replies and sign-in are disabled in the public preview. Scheduled routines, news feeds, calendar and wearable integrations, image uploads, invitations to collaborators, and autonomous external actions are not implemented. An access-code invitation is a private pilot login, not area sharing. The daily brief is a view of workspace tasks, not generated news or calendar data.
+Scheduled routines, news feeds, calendar and wearable integrations, image uploads, invitations to collaborators, and autonomous external actions are not implemented. An access-code invitation is a private pilot login, not area sharing. The daily brief is a view of workspace tasks, not generated news or calendar data.
 
 ## Run the interface
 
@@ -48,3 +51,7 @@ No PostgreSQL credentials, API keys, access codes or personal data belong in `we
 ## Design provenance
 
 Brand palette, Inter fonts, and visual direction come from the supplied Morrowfold Polsia project. The working app and API were created separately so the original download remains unchanged. Inter font sources are recorded in `web/public/fonts/SOURCE.md`.
+
+## Documentation practice
+
+Update the relevant architecture, deployment or integration document alongside each implementation change. Add a dated entry to [the implementation log](docs/implementation-log.md) describing what changed, why, validation evidence, deployment status and remaining work. Distinguish implemented, deployed, end-to-end verified and planned. Never record credentials, access codes or private message content in documentation.

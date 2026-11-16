@@ -4,7 +4,7 @@
 
 The first live acceptance flow is: sign in with a private pilot code → create an area and a memory → reload and verify persistence → ask Mistral a scoped question → prepare and edit a draft. No synthetic responses, fallback demo data, or unsupported “connected” badges.
 
-Proposed infrastructure: Supabase PostgreSQL in Central EU (Frankfurt), the existing Python API on Render Frankfurt, and the existing GitHub Pages frontend. These are region selections, not claims that the providers are exclusively EU-owned or that every ancillary processing activity is EU-only. Review the relevant processing agreements for the pilot.
+Deployed infrastructure: Supabase PostgreSQL in Central EU (Frankfurt), the existing Python API on Render Frankfurt, and the existing GitHub Pages frontend. These are region selections, not claims that the providers are exclusively EU-owned or that every ancillary processing activity is EU-only. Review the relevant processing agreements for the pilot.
 
 `render.yaml` prepares a free setup instance with manual deployments and secret placeholders. Free Render services sleep after inactivity, so use an approved always-on plan before regular testing. A paid plan must be selected by the owner with an explicit budget. No hosted resources are provisioned merely by committing this file.
 
@@ -18,7 +18,7 @@ First workflow: the user chooses emails relevant to one area; the assistant can 
 
 Prepare replies in Morrowfold first. Saving drafts into Gmail requires additional permission (`gmail.compose`, which also permits sending at the provider level). Do not request it until the product needs Gmail drafts; server-side controls must still prohibit sending unless a separate explicit approval flow exists.
 
-Implementation needs OAuth state/PKCE, per-user encrypted refresh-token storage, revocation/disconnect, scope checks, timeouts/retries, clear source attribution, prompt-injection boundaries and a minimal privacy/retention policy. Confirm Google's verification and security assessment requirements before external rollout. Never infer approval to send mail from a generated draft.
+Implemented: OAuth state/PKCE, browser-bound completion proof, per-user encrypted refresh-token storage, revocation/disconnect, scope checks, request timeouts, source attribution and prompt-injection instructions. Mailbox consent and a selected-message end-to-end test remain pending. A complete privacy/retention policy and broader resilience testing remain release work. Confirm Google's verification and security assessment requirements before external rollout. Never infer approval to send mail from a generated draft.
 
 ## LinkedIn second
 

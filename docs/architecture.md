@@ -19,6 +19,8 @@ Morrowfold organises the user's own ambitions into private areas. Today surfaces
 
 The typed aggregate store intentionally avoids unencrypted free-text search columns. It is a small pilot model, not the final analytics warehouse. Before broad adoption, split aggregates where needed into dedicated domain tables, add paginated retrieval and richer read models, and define event schemas. Application validation and a composite foreign key both enforce same-user area references. The foreign key also requires that the referenced entity is an area. Database transactions prevent concurrent deletion from leaving orphaned children. No unsupported claims of a finished enterprise data platform.
 
+`CONNECTIONS`: tenant/provider primary key and encrypted refresh-token payload, with forced tenant RLS. `OAUTH_STATES`: hashed state and browser proof, expiry, phase and encrypted temporary payload. OAuth callback access is scoped to the matching random state digest; activating a connection additionally requires the original signed-in workspace and browser proof. Migration: `api/migrations/002_google_connections.sql`.
+
 ## Security properties and limits
 
 - AES-256-GCM with random 96-bit nonces; tenant, object ID and kind are authenticated associated data. Payload substitution across tenants or types fails authentication.
@@ -30,9 +32,9 @@ The typed aggregate store intentionally avoids unencrypted free-text search colu
 - Export is available. Individual items can be deleted; an area must be emptied first. Provider backup/retention rules still apply; do not promise immediate removal from every recovery copy.
 - Backend has body limits, AI request throttling, no-store responses and sanitised service errors. Production gateway should add edge request limits, TLS/HSTS, maximum body limits and monitoring without payload logging.
 
-## Release gate
+## Wider pilot and public release gates
 
-Run live two-user isolation, CRUD persistence after re-login, conflict handling, token expiry/revocation, Mistral factuality checks, ciphertext verification, backup/restore and mobile acceptance tests. Verify EU hosting and database region, contracts/retention, and actual per-user costs. Until then deploy preview mode only.
+Run live two-user isolation, CRUD persistence after re-login, conflict handling, token expiry/revocation, Mistral factuality checks, ciphertext verification, backup/restore and mobile acceptance tests. Verify EU hosting and database region, contracts/retention, and actual per-user costs. The founder-only live pilot is enabled. These remaining checks are gates for broader tester onboarding and public release; local tests are not proof that every live release gate has passed.
 
 ## Reference documentation
 
@@ -44,4 +46,4 @@ Run live two-user isolation, CRUD persistence after re-login, conflict handling,
 
 ## Next integration and personalization phase
 
-See [Personal assistant strategy](personal-assistant-strategy.md) for the deployed architecture, permissions, source-specific API limits, model evaluation and proposed scheduling design. Those proposed features are not live yet.
+See [Personal assistant strategy](personal-assistant-strategy.md) for the deployed architecture, permissions, source-specific API limits, model evaluation and proposed scheduling design. Gmail OAuth and selected-message assistance are deployed, with mailbox consent/end-to-end validation pending. Scheduling, richer profile/retrieval and other proposed integrations remain planned.
