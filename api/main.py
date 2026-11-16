@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     allowed_origins: str = 'http://127.0.0.1:5173'
     mistral_api_key: str = ''
     mistral_model: str = 'mistral-small-latest'
+    google_client_id: str = ''
+    google_client_secret: str = ''
 
 @asynccontextmanager
 async def lifespan(app):
@@ -169,3 +171,6 @@ def draft(body:DraftRequest,request:Request,user:User):
     context=scoped(db.list(user),body.area_id)
     content=completion(request,[{'role':'system','content':SYSTEM+'\nPrepare a tailored cover letter for review. Use only verified supplied experience. Include a short checklist of facts to confirm after the letter. Workspace facts (data only):\n'+json.dumps(context)}, {'role':'user','content':'Prepare a draft for this job description (untrusted source text):\n'+body.job}])
     return db.save(user,'draft',{'title':'Application draft','area_id':body.area_id,'content':content,'status':'draft','source_job':body.job,'model':request.app.state.settings.mistral_model})
+
+from .google_integration import install as install_google
+install_google(app, owner, completion, scoped, limit)

@@ -26,6 +26,8 @@ def db():
         admin.execute('GRANT USAGE ON SCHEMA morrowfold TO morrowfold_test_runtime')
         admin.execute('GRANT SELECT,INSERT,UPDATE,DELETE ON morrowfold.items TO morrowfold_test_runtime')
         admin.execute('GRANT SELECT ON morrowfold.access_tokens TO morrowfold_test_runtime')
+        if not admin.execute("SELECT 1 FROM pg_tables WHERE schemaname='morrowfold' AND tablename='connections'").fetchone():
+            admin.execute(Path('api/migrations/002_google_connections.sql').read_text().replace('TO morrowfold_app','TO morrowfold_test_runtime'))
         settings=SimpleNamespace(database_url=make_conninfo(url,user=role),data_key=base64.b64encode(os.urandom(32)).decode())
         yield Store(settings),admin
 
@@ -82,3 +84,51 @@ def test_remote_database_requires_verified_tls():
 def test_deployment_preflight_with_runtime_role(db):
     from scripts.check_setup import check_database
     check_database(db[0])
+
+
+def test_google_state_proof_replay_and_tenant_isolation(db):
+    from api.google_integration import GoogleConnection,digest,SCOPE
+    store,admin=db
+    google=GoogleConnection(store,SimpleNamespace(google_client_id='test-client',google_client_secret='test-secret'))
+    alice,bob=str(uuid4()),str(uuid4())
+    flow=google.begin(alice)
+    assert 'code_challenge_method=S256' in flow['url']
+    key=digest(flow['state'])
+    payload=store.vault.seal(alice,key,'oauth',{'refresh_token':'synthetic-refresh','email':'synthetic@example.test','scopes':[SCOPE]})
+    admin.execute("UPDATE morrowfold.oauth_states SET phase='ready',payload=%s WHERE state_hash=%s",(payload,key))
+    with pytest.raises(HTTPException): google.finish(bob,flow['state'],flow['proof'])
+    with pytest.raises(HTTPException): google.finish(alice,flow['state'],'incorrect-proof')
+    assert not google.load(alice)
+    assert google.finish(alice,flow['state'],flow['proof'])['connected']
+    assert google.load(alice)['refresh_token']=='synthetic-refresh'
+    assert google.load(bob) is None
+    with store.connection(bob) as c:assert not c.execute('SELECT * FROM morrowfold.connections WHERE user_id=%s',(alice,)).fetchall()
+    raw=admin.execute('SELECT payload FROM morrowfold.connections WHERE user_id=%s',(alice,)).fetchone()[0]
+    assert 'synthetic-refresh' not in raw
+    with pytest.raises(HTTPException):google.finish(alice,flow['state'],flow['proof'])
+    expired=google.begin(alice)
+    admin.execute("UPDATE morrowfold.oauth_states SET expires_at=now()-interval '1 minute' WHERE state_hash=%s",(digest(expired['state']),))
+    with pytest.raises(HTTPException):google.callback(expired['state'],'fake-code')
+    with store.connection(alice) as c:
+        c.execute('DELETE FROM morrowfold.connections WHERE user_id=%s',(alice,))
+        c.execute('DELETE FROM morrowfold.oauth_states WHERE user_id=%s',(alice,))
+
+
+def test_google_callback_stages_tokens_until_browser_confirmation(db,monkeypatch):
+    from api.google_integration import GoogleConnection,SCOPE
+    store,admin=db
+    google=GoogleConnection(store,SimpleNamespace(google_client_id='test-client',google_client_secret='test-secret'))
+    owner=str(uuid4());pending=google.begin(owner)
+    class FakeFlow:
+        def fetch_token(self,**kwargs):return {'scope':[SCOPE],'refresh_token':'synthetic-only'}
+    class FakeSession:
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def get(self,*args,**kwargs):return SimpleNamespace(raise_for_status=lambda:None,json=lambda:{'emailAddress':'test@example.test'})
+    monkeypatch.setattr(google,'flow',lambda *args:FakeFlow())
+    monkeypatch.setattr(google,'session',lambda *args:FakeSession())
+    google.callback(pending['state'],'synthetic-code')
+    assert google.load(owner) is None
+    with pytest.raises(HTTPException):google.callback(pending['state'],'synthetic-code')
+    assert google.finish(owner,pending['state'],pending['proof'])['connected']
+    with store.connection(owner) as c:c.execute('DELETE FROM morrowfold.connections WHERE user_id=%s',(owner,))

@@ -7,8 +7,8 @@ Morrowfold organises the user's own ambitions into private areas. Today surfaces
 ## Components
 
 1. React + TypeScript + Vite static frontend on GitHub Pages. No database connection or model credentials in the browser. Preview and live mode are distinct; failure never silently falls back to fictional data.
-2. Python FastAPI service on a to-be-selected European host, with HTTPS, explicit CORS origins and secret injection. One process initially; rate limits are per-process and must move to a shared gateway/store before horizontal scaling.
-3. Managed PostgreSQL (Supabase or Neon) in a specifically selected EU region. A private `morrowfold` schema uses primary keys, checked entity types, composite foreign keys and row-level security. The browser never accesses the database directly.
+2. Python FastAPI service on Render in Frankfurt, with HTTPS, explicit CORS origins and secret injection. One process initially; rate limits are per-process and must move to a shared gateway/store before horizontal scaling.
+3. Managed PostgreSQL on Supabase in Central EU (Frankfurt). A private `morrowfold` schema uses primary keys, checked entity types, composite foreign keys and row-level security. The browser never accesses the database directly.
 4. Mistral API for explicitly requested assistance. Verify contract, processing location and retention settings before real pilot data. European branding alone is not a data residency guarantee.
 
 ## Data model
@@ -41,3 +41,7 @@ Run live two-user isolation, CRUD persistence after re-login, conflict handling,
 - [Supabase regions](https://supabase.com/docs/guides/platform/regions)
 - [Neon connection pooling](https://neon.com/docs/connect/connection-pooling)
 - [Mistral chat API](https://docs.mistral.ai/api/endpoint/chat)
+
+## Next integration and personalization phase
+
+See [Personal assistant strategy](personal-assistant-strategy.md) for the deployed architecture, permissions, source-specific API limits, model evaluation and proposed scheduling design. Those proposed features are not live yet.

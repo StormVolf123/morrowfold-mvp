@@ -26,11 +26,12 @@ import {
 import { api, configure, config, login, logout, signedIn } from "./client";
 import { seed, type Item, type Kind } from "./domain";
 import "./style.css";
+import { GooglePanel } from "./GooglePanel";
 function App() {
   const [ready, setReady] = useState(false),
     [authenticated, setAuthenticated] = useState(false),
     [items, setItems] = useState<Item[]>([]),
-    [view, setView] = useState("today"),
+    [view, setView] = useState(location.hash.startsWith("#gmail") ? "settings" : "today"),
     [selected, setSelected] = useState<string | null>(null),
     [modal, setModal] = useState(""),
     [editing, setEditing] = useState<Item | null>(null),
@@ -795,6 +796,7 @@ function App() {
                   <h1>Your space. Your say.</h1>
                 </div>
               </div>
+              {!demo && <GooglePanel areas={areas} onResult={(item) => {setItems(prev=>[...prev,item]);setConversation(item.id);setMessages(item.data.messages||[]);setScope(item.data.area_id||"");setView("chat");}} />}
               <section className="panel settings">
                 <ShieldCheck />
                 <h2>
