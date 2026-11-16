@@ -1,1 +1,4 @@
-{ "apiUrl": "", "mode": "preview" }
+{
+  "apiUrl": "https://morrowfold-api-8ify.onrender.com",
+  "mode": "live"
+}
