@@ -77,3 +77,8 @@ def test_remote_database_requires_verified_tls():
     store=Store(SimpleNamespace(database_url='postgresql://example.invalid/test?sslmode=require',data_key=base64.b64encode(b'x'*32).decode()))
     with pytest.raises(ValueError,match='verify-full'):
         with store.connection(): pass
+
+
+def test_deployment_preflight_with_runtime_role(db):
+    from scripts.check_setup import check_database
+    check_database(db[0])

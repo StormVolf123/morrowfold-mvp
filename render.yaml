@@ -1,0 +1,23 @@
+# Setup preview. Move to an always-on plan before regular pilot use.
+# Add secrets in Render; never commit their values.
+services:
+  - type: web
+    name: morrowfold-api
+    runtime: docker
+    region: frankfurt
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DATA_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: MISTRAL_MODEL
+        value: mistral-small-latest
+      - key: ALLOWED_ORIGINS
+        value: https://stormvolf123.github.io

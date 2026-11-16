@@ -69,3 +69,11 @@ Distribute privately through a channel you choose. The file has mode 0600 and `.
 - Verify Pages project-path assets, mobile keyboard, reduced motion, CORS, gateway rate limits and EU processing settings.
 
 Local database integration tests and unit/API tests support these checks but do not prove the hosted deployment is configured correctly. Public Pages stays in preview until then.
+
+## Prepared Supabase + Render setup
+
+A root `render.yaml` is available for the proposed Frankfurt backend. It contains no secrets and does not enable public live mode. Its free instance is for setup only; request an approved always-on plan before regular testing. Supply the three secret values in Render's environment settings. The encryption key must remain stable across redeployments and be backed up securely.
+
+With the environment configured, run `python scripts/check_setup.py --mistral` from the repository root. This validates database permissions/RLS and available Mistral models without sending user data. A passing result is followed by real persistence and chat smoke tests; only then change `web/public/config.json` to live.
+
+See [integration sequencing](integrations.md) for Gmail and LinkedIn permissions and the initial supported workflows.
