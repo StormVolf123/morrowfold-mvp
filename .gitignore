@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*.pem
+*.p8
+.DS_Store
+.private/
+qa/
+
+.venv-*/
